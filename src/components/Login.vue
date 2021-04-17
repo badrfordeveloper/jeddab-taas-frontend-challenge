@@ -1,11 +1,18 @@
 <template>
   <v-container  fill-height>
-    <div v-if="authorized" fluid>
+    <div v-if="authorized" class="fullwidth">
+
       <v-alert dense type="info">
         Your github accout was successfully authorized
       </v-alert>
 
-      <v-data-iterator
+         <v-row >
+            <v-col
+        cols="6"
+        md="3"
+         class="text-left"
+      >
+          <v-data-iterator
         :items="items"
         :search="search"
         :sort-by="sortBy.toLowerCase()"
@@ -48,36 +55,83 @@
           </v-card>
         </template>
       </v-data-iterator>
-
-      <v-select
+      </v-col>
+      <v-col
+        cols="12"
+        sm="12"
+        md="8"
+      >
+      <div  v-if="branches.length" fluid="false"  class="text-left">
+        <h2>{{currentRepos}}</h2>
+         <v-col
+        cols="6"
+        sm="12"
+        md="2"
+      ><v-select
       v-on:change="changeBranche"
           :items="branches"
-          label="Solo field"
+          label="Select branch"
            item-text="name"
            v-model="selectedItem"
+           max-width=150
+
+
           solo
-        ></v-select>
+        ></v-select></v-col>
+         
         <div  v-if="commits.length" >
           <v-card  v-for="(item, i) in commits" :key="i" >
-              <v-list-item three-line>
-                <v-list-item-content>
+              <v-list-item three-line >
+                <v-list-item-content >
                   <v-list-item-title> 
-                    <v-img
-                      max-height="50"
-                      max-width="50"
-                      :src="item.avatar_url"
-                    ></v-img> {{ item.name }} </v-list-item-title>
+                      <v-row
+              align="center"
+              class="spacer"
+              no-gutters
+            >
+                      <v-col
+                cols="0"
+                sm="0"
+                md="0"
+
+              >
+                <v-avatar
+                  size="36px"
+                >
+                  <img
+                    alt="Avatar"
+                    :src="item.avatar_url"
+                  >
+                </v-avatar>
+              </v-col>
+              
+              <v-col
+                class="hidden-xs-only"
+                sm="5"
+                md="3"
+              >
+                <strong class="name">{{ item.name }} </strong> committed {{moment(item.date).format('MM/DD/YYYY hh:mm')}} 
+              
+              </v-col>
+                      </v-row>
+
+                   </v-list-item-title>
                   <v-list-item-subtitle>
-                   {{ item.date }}
-                  </v-list-item-subtitle>
-                  <v-list-item-subtitle>
-                    {{ item.message }}
+                   <strong > Message : {{ item.message }}</strong >
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
           </v-card>
 
         </div>
+      </div>
+      </v-col>
+     
+    </v-row>
+
+    
+
+     
 
          
 
@@ -95,7 +149,9 @@
   </v-container>
 </template>
 <script>
+import moment from 'moment'
 export default {
+  
   data: () => ({
     authorized: false,
     user: [],
@@ -113,6 +169,7 @@ export default {
     sortBy: "name",
     keys: ["name", "id"],
     currentCommitsUrl: "",
+    currentRepos: "",
     obj: {
       email: "",
       password: "",
@@ -165,7 +222,9 @@ export default {
   },
 
   methods: {
+    moment,
     async getBranches(item) {
+      
       this.selectedItem="";
       const res = await this.$axios.get(item.branches_url);
       
@@ -181,9 +240,11 @@ export default {
           })
           .filter(Boolean);
           this.currentCommitsUrl=item.commits_url;
+          this.currentRepos=item.name;
+          this.commits=[];
       }
     },
-
+    // get commits
     async changeBranche(branche){
       const url=this.currentCommitsUrl+"?sha="+branche;
         const res = await this.$axios.get(url);
@@ -211,3 +272,12 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.fullwidth{
+  width: 100%;
+}
+.name{
+  margin-left: 10px;
+}
+</style>
