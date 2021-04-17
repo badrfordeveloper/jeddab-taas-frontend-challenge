@@ -1,5 +1,6 @@
 <template>
   <v-container fill-height>
+    
     <v-alert
       dense
       type="error"
@@ -9,12 +10,15 @@
     >
       {{ erreurMessage }}
     </v-alert>
+  <!--   if authorized -->
     <div v-if="authorized" class="fullwidth">
       <v-alert dense type="info" dismissible>
-        Your github accout was successfully authorized
+        Your github account was successfully authorized
       </v-alert>
 
       <v-row>
+
+        <!-- repos -->
         <v-col cols="6" md="3" class="text-left">
           <v-data-iterator
             :items="items"
@@ -60,6 +64,7 @@
             </template>
           </v-data-iterator>
         </v-col>
+        <!-- select branches -->
         <v-col cols="12" sm="12" md="8">
           <div v-if="branches.length" fluid="false" class="text-left">
             <h2>{{ currentRepos }}</h2>
@@ -74,7 +79,7 @@
                 solo
               ></v-select
             ></v-col>
-
+            <!-- list of commits -->
             <div v-if="commits.length">
               <v-card v-for="(item, i) in commits" :key="i">
                 <v-list-item three-line>
@@ -105,7 +110,7 @@
         </v-col>
       </v-row>
     </div>
-
+<!--   if not authorized -->
     <v-layout align-center justify-center v-if="!authorized">
       <v-flex xs12 sm8 md3>
         <v-btn
@@ -140,19 +145,19 @@ export default {
     keys: ["name", "id"],
     currentCommitsUrl: "",
     currentRepos: "",
-    obj: {
-      email: "",
-      password: "",
-    },
+    client_id:"Iv1.1b16558eb9485da0",
+    client_secret:"2dd4659eb59a283df20b01e921a91479cfec6abc"
+    
   }),
   async created() {
-    // check if the url has code parms
+    // check if the url has code params
     if (this.$route.query.code && !this.authorized) {
+
       var flagAccessToken = false;
       var flagUser = false;
       var accessToken = "";
 
-      // to get the resultat in format json
+      // to get the resultat in format json to acces to the access_token
       const headers = {
         Accept: "application/json",
       };
@@ -162,8 +167,8 @@ export default {
         .post(
           "https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token",
           {
-            client_id: "Iv1.1b16558eb9485da0",
-            client_secret: "2dd4659eb59a283df20b01e921a91479cfec6abc",
+            client_id: this.client_id,
+            client_secret: this.client_secret ,
             code: this.$route.query.code,
           },
           {
@@ -182,6 +187,7 @@ export default {
 
       if (flagAccessToken) {
         // i use https://cors-anywhere.herokuapp.com/ cause of problem of the localhost (untrusted src for github)
+        // get the infos of user using the accessToken
         await this.$axios
           .get(
             "https://cors-anywhere.herokuapp.com/https://api.github.com/user",
@@ -202,7 +208,7 @@ export default {
             console.log(error);
           });
       }
-
+      // get the list of repos  by the token access
       if (flagUser) {
         await this.$axios
           .get(this.user.repos_url, {
@@ -211,6 +217,7 @@ export default {
             },
           })
           .then((resultat2) => {
+            // select the needed attribute
             this.items = resultat2.data.map((obj) => {
               return {
                 id: obj.id,
@@ -231,21 +238,25 @@ export default {
 
   methods: {
     moment,
+    //get branches
     async getBranches(item) {
       this.selectedItem = "";
         await this.$axios.get(item.branches_url).then((res) => {
              this.branches = res.data
           .map((obj) => {
+             // select the needed attribute , filter boolean remove the undefined
             if (!obj.name.includes("dependabot")) {
               return {
                 name: obj.name,
-                /*  branches_url:obj.branches_url.slice(0, -9) */
               };
             }
           })
           .filter(Boolean);
+          // the url of commits of repos
         this.currentCommitsUrl = item.commits_url;
+        //new repos
         this.currentRepos = item.name;
+        //reset commits
         this.commits = [];
 
           })
@@ -257,8 +268,11 @@ export default {
     },
     // get commits
     async changeBranche(branche) {
+      // get commits of branch
       const url = this.currentCommitsUrl + "?sha=" + branche;
-       await this.$axios.get(url) .then((res) => {
+       await this.$axios.get(url)
+       .then((res) => {
+          // select the needed attribute
              this.commits = res.data.map((obj) => {
           return {
             name: obj.commit.committer.name,
@@ -278,6 +292,7 @@ export default {
     },
   },
   computed: {
+    //filter data interior
     filteredKeys() {
       return this.keys.filter((key) => key !== "Name");
     },
