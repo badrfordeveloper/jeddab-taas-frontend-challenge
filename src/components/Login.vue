@@ -2,7 +2,7 @@
   <v-container fill-height>
     <v-alert
       dense
-      type="erreur"
+      type="error"
       class="fullwidth"
       v-if="alertErreur"
       dismissible

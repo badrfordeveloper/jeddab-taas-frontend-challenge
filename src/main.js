@@ -7,6 +7,7 @@ import common from './common';
 import axios from 'axios';
 import VueRouter from 'vue-router';
 import routes from './routes';
+import '@mdi/font/css/materialdesignicons.css'
 
 
 Vue.use(Vuetify);
