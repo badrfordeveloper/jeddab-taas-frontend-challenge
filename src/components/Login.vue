@@ -145,9 +145,8 @@ export default {
     keys: ["name", "id"],
     currentCommitsUrl: "",
     currentRepos: "",
-    client_id:"Iv1.1b16558eb9485da0",
-    client_secret:"2dd4659eb59a283df20b01e921a91479cfec6abc"
-    
+    client_id: "Iv1.1b16558eb9485da0",
+     client_secret: "2dd4659eb59a283df20b01e921a91479cfec6abc",
   }),
   async created() {
     // check if the url has code params
@@ -168,7 +167,7 @@ export default {
           "https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token",
           {
             client_id: this.client_id,
-            client_secret: this.client_secret ,
+            client_secret: this.client_secret,
             code: this.$route.query.code,
           },
           {
