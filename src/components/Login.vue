@@ -26,6 +26,7 @@
             :sort-by="sortBy.toLowerCase()"
             :sort-desc="sortDesc"
             hide-default-footer
+            :custom-filter="customFilter"
           >
             <template v-slot:header>
               <v-toolbar dark color="blue darken-3" class="mb-1">
@@ -46,7 +47,7 @@
                     solo-inverted
                     hide-details
                     :items="keys"
-                    prepend-inner-icon="mdi-magnify"
+                    
                     label="Sort by"
                   ></v-select>
                 </template>
@@ -289,11 +290,30 @@ export default {
 
    
     },
+    customFilter(items, search) {
+
+            search = search.toString().toLowerCase()
+           
+            return items.filter(row => {
+               return (row.name.toString().toLowerCase().includes(search))
+            });
+
+        }
   },
   computed: {
+     filteredItems() {
+      return this.items.filter((i) => {
+        console.log(i)
+        return !this.name ;
+      })
+    },
+
     //filter data interior
     filteredKeys() {
-      return this.keys.filter((key) => key !== "Name");
+      return this.keys.filter((key) =>
+       {
+        return key !== "Name"}
+       );
     },
   },
 };
